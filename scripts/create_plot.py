@@ -20,7 +20,7 @@ def read_data(filename):
     try:
         with open(filename, "r") as file:
             # Skip header line
-            header = file.readline().strip()
+            file.readline().strip()
 
             for line_num, line in enumerate(file, start=2):
                 line = line.strip()
@@ -36,7 +36,7 @@ def read_data(filename):
                         s = float(parts[2])
                         threads.append(t)
                         speedup.append(s)
-                    except ValueError as e:
+                    except ValueError:
                         print(f"Warning: Could not parse line {line_num}: {line}")
                         continue
                 else:
