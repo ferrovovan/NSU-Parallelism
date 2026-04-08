@@ -1,6 +1,8 @@
 #include <iostream>
+#include <fstream>   // csv write
 #include <iomanip>   // setw, setprecision, fixed
 #include <vector>
+#include <string>    // file_name
 #include <utility>   // pair
 #include <thread>
 #include <chrono>
@@ -78,6 +80,34 @@ void print_table(const std::vector<std::pair<int, double>>& results)
 }
 
 
+int write_csv_data(const std::vector<std::pair<int, double>>& results,
+                   const std::string& filename)
+{
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: cannot open file " << filename << std::endl;
+        return 1;
+    }
+
+    double serial_time = results.front().second;
+
+    // Write header
+    file << "Threads;Elapsed time (sec);Speedup\n";
+
+    // Write data rows
+    for (const auto& [threads, runtime] : results) {
+        double speedup = serial_time / runtime;
+        file << threads << ";"
+             << std::fixed << std::setprecision(6) << runtime << ";"
+             << std::fixed << std::setprecision(3) << speedup << ";\n";
+    }
+
+    file.close();
+    std::cout << "\nWrote data in " << filename << std::endl;
+    return 0;
+}
+
+
 int main(int argc, char* argv[])
 {
     /* ---------- Считывание аргументов ---------- */
@@ -98,6 +128,7 @@ int main(int argc, char* argv[])
    }
 
     print_table(runtimes);
+    write_csv_data(runtimes, "task3.csv");
 
     return 0;
 }
