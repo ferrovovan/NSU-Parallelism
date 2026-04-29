@@ -1,12 +1,13 @@
 import argparse
+import logging
+import queue
+import sys
 import threading
 import time
-import cv2
-import logging
-import sys
-import queue
 
-logging.basicConfig(filename='app.log', level=logging.INFO)
+import cv2
+
+logging.basicConfig(filename="app.log", level=logging.INFO)
 flag = True
 
 
@@ -29,8 +30,8 @@ class SensorX(Sensor):
 
 
 class SensorCam(Sensor):
-    def __init__(self, cam, res):
-        if cam == 'default':
+    def __init__(self, cam: str, res: tuple[int, int]):
+        if cam == "default":
             self.cap = cv2.VideoCapture(0)
         else:
             self.cap = cv2.VideoCapture(cam)
@@ -39,7 +40,6 @@ class SensorCam(Sensor):
 
     def get(self):
         ret, frame = self.cap.read()
-
         return frame, ret
 
     def release(self):
@@ -58,8 +58,12 @@ class WindowImage:
         text2 = f"Sensor 2: {s2}"
         text3 = f"Sensor 3: {s3}"
         cv2.putText(img, text1, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        cv2.putText(img, text2, (x, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        cv2.putText(img, text3, (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(
+            img, text2, (x, y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+        )
+        cv2.putText(
+            img, text3, (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+        )
         cv2.imshow("window", img)
 
     def close(self):
@@ -76,7 +80,7 @@ def process(que, sensor):
 
 def main(args):
     global flag
-    shapes = (int(args.res.split('*')[0]), int(args.res.split('*')[1]))
+    shapes = (int(args.res.split("*")[0]), int(args.res.split("*")[1]))
     sensor0 = SensorX(0.01)
     sensor1 = SensorX(0.1)
     sensor2 = SensorX(1)
@@ -84,7 +88,7 @@ def main(args):
     camera = SensorCam(args.cam, shapes)
 
     if not camera.cap.isOpened():
-        logging.info('The camera is turned off.')
+        logging.info("The camera is turned off.")
         camera.release()
         window.close()
         sys.exit()
@@ -112,7 +116,7 @@ def main(args):
             sensor0 = queue3.get()
         sensim, ret = camera.get()
         if not ret or not camera.cap.isOpened() or not camera.cap.grab():
-            logging.info('The camera had turned off.')
+            logging.info("The camera had turned off.")
             camera.release()
             window.close()
             flag = False
@@ -121,17 +125,17 @@ def main(args):
         window.show(sensim, sensor2, sensor1, sensor0)
         time.sleep(1 / window.freq)
 
-        if cv2.waitKey(1) == ord('q'):
+        if cv2.waitKey(1) == ord("q"):
             camera.release()
             window.close()
             flag = False
             sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cam', type=str, default='default', help='Camera name')
-    parser.add_argument('--res', type=str, default='1280*720', help='Camera resolution')
-    parser.add_argument('--freq', type=int, default=60, help='Output frequency')
+    parser.add_argument("--cam", type=str, default="default", help="Camera name")
+    parser.add_argument("--res", type=str, default="1280*720", help="Camera resolution")
+    parser.add_argument("--freq", type=int, default=60, help="Output frequency")
     args = parser.parse_args()
     main(args)
