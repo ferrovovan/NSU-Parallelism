@@ -49,15 +49,15 @@ void matrix_vector_product_omp(double* a, double* b, double* c, size_t m, size_t
 /* Применение программ */
 
 void safe_varibles_malloc
-(double *a, double *b, double *c, size_t n, size_t m)
+(double **a, double **b, double **c, size_t n, size_t m)
 {
-    a = (double*)malloc(sizeof(*a) * m * n);
-    b = (double*)malloc(sizeof(*b) * n);
-    c = (double*)malloc(sizeof(*c) * m);
+    *a = (double*)malloc(sizeof(double) * m * n);
+    *b = (double*)malloc(sizeof(double) * n);
+    *c = (double*)malloc(sizeof(double) * m);
 
-    if (a == NULL || b == NULL || c == NULL)
+    if (*a == NULL || *b == NULL || *c == NULL)
     {
-        free(a); free(b); free(c);
+        free(*a); free(*b); free(*c);
         printf("Error allocate memory!\n");
         exit(1);
     }
@@ -67,7 +67,7 @@ void safe_varibles_malloc
 double run_serial(size_t n, size_t m)
 {
     double *a, *b, *c;
-    safe_varibles_malloc(a, b, c, n, m);
+    safe_varibles_malloc(&a, &b, &c, n, m);
 
     // Инициализация матрицы и вектора
     for (size_t i = 0; i < m; i++)
@@ -91,7 +91,7 @@ double run_parallel(size_t n, size_t m, int num_of_threads)
 {
     // Объявление
     double *a, *b, *c;
-    safe_varibles_malloc(a, b, c, n, m);
+    safe_varibles_malloc(&a, &b, &c, n, m);
 
     /* Инициализация матрицы и вектора */
     // Параллельная инициализация матрицы A
